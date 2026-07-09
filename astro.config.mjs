@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
+import cloudflare from "@astrojs/cloudflare";
+
 // UtilHub configuration
 // https://astro.build/config
 export default defineConfig({
@@ -19,4 +21,5 @@ export default defineConfig({
   },
 
   compressHTML: true,
+  adapter: cloudflare()
 });
