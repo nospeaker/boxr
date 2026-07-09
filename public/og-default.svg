@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3491ff"/>
+      <stop offset="100%" stop-color="#152a5e"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <g transform="translate(120, 200)">
+    <!-- Logo -->
+    <rect width="80" height="80" rx="20" fill="rgba(255,255,255,0.18)"/>
+    <path d="M28 20l-22 20 22 20M52 20l22 20-22 20" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <text x="120" y="380" fill="white" font-family="Inter, system-ui, sans-serif" font-size="80" font-weight="700">
+    UtilHub
+  </text>
+  <text x="120" y="450" fill="rgba(255,255,255,0.85)" font-family="Inter, system-ui, sans-serif" font-size="36">
+    Free Online Developer &amp; Text Tools
+  </text>
+  <text x="120" y="510" fill="rgba(255,255,255,0.65)" font-family="Inter, system-ui, sans-serif" font-size="24">
+    JSON Formatter · Regex Tester · Case Converter · and more
+  </text>
+</svg>

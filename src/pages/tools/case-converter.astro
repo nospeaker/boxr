@@ -1,0 +1,106 @@
+---
+import ToolLayout from '~/layouts/ToolLayout.astro';
+import { ALL_CASES } from '~/tools/case';
+
+const SAMPLE = 'helloWorld_from JSON';
+---
+
+<ToolLayout toolSlug="case-converter">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <button id="sample-btn" class="btn-ghost text-sm">Sample</button>
+    <button id="clear-btn" class="btn-ghost text-sm">Clear</button>
+    <div class="ml-auto flex items-center gap-2">
+      <button id="upper-btn" class="btn-ghost text-sm">UPPER</button>
+      <button id="lower-btn" class="btn-ghost text-sm">lower</button>
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Input text</label>
+    <textarea
+      id="case-input"
+      class="input-base scrollbar-thin mt-1 h-32 resize-y"
+      placeholder="Paste or type any text..."
+      spellcheck="false"
+    >{SAMPLE}</textarea>
+  </div>
+
+  <div class="mt-6 grid gap-3 sm:grid-cols-2">
+    {ALL_CASES.map((c) => (
+      <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200 dark:bg-slate-900/50 dark:ring-slate-800">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{c}</span>
+          <button class="copy-row-btn text-slate-400 hover:text-brand-600" data-target={`out-${c}`} aria-label={`Copy ${c}`}>
+            <iconify-icon icon="lucide:copy" width="14" height="14"></iconify-icon>
+          </button>
+        </div>
+        <textarea
+          id={`out-${c}`}
+          readonly
+          class="mt-2 w-full resize-none bg-transparent font-mono text-sm text-slate-900 focus:outline-none dark:text-slate-100"
+          rows="2"
+        ></textarea>
+      </div>
+    ))}
+  </div>
+
+  <Fragment slot="about">
+    <p>
+      Convert text between every common programming case style — instantly and locally.
+    </p>
+    <ul>
+      <li><strong>camelCase</strong> &mdash; <code>helloWorld</code></li>
+      <li><strong>PascalCase</strong> &mdash; <code>HelloWorld</code></li>
+      <li><strong>snake_case</strong> &mdash; <code>hello_world</code></li>
+      <li><strong>kebab-case</strong> &mdash; <code>hello-world</code></li>
+      <li><strong>CONSTANT_CASE</strong> &mdash; <code>HELLO_WORLD</code></li>
+      <li><strong>dot.case</strong> &mdash; <code>hello.world</code></li>
+      <li><strong>Title Case</strong>, <strong>Sentence case</strong>, <strong>UPPERCASE</strong>, <strong>lowercase</strong></li>
+    </ul>
+    <p>Built for developers: paste any mixed-format text and copy the variant you need.</p>
+  </Fragment>
+</ToolLayout>
+
+<script>
+  import { toCase, ALL_CASES } from '~/tools/case';
+
+  const input = document.getElementById('case-input') as HTMLTextAreaElement;
+
+  function run() {
+    for (const c of ALL_CASES) {
+      const out = document.getElementById(`out-${c}`) as HTMLTextAreaElement | null;
+      if (!out) continue;
+      out.value = toCase(input.value, c);
+    }
+  }
+
+  function makeOp(handler: (s: string) => string) {
+    return () => {
+      input.value = handler(input.value);
+      run();
+    };
+  }
+
+  document.getElementById('upper-btn')?.addEventListener('click', makeOp((s) => s.toUpperCase()));
+  document.getElementById('lower-btn')?.addEventListener('click', makeOp((s) => s.toLowerCase()));
+  document.getElementById('sample-btn')?.addEventListener('click', () => { input.value = 'helloWorld_from JSON'; run(); });
+  document.getElementById('clear-btn')?.addEventListener('click', () => { input.value = ''; run(); });
+
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as HTMLElement).closest('.copy-row-btn') as HTMLElement | null;
+    if (!btn) return;
+    const tid = btn.getAttribute('data-target');
+    if (!tid) return;
+    const out = document.getElementById(tid) as HTMLTextAreaElement | null;
+    if (!out) return;
+    try {
+      await navigator.clipboard.writeText(out.value);
+      const html = btn.innerHTML;
+      btn.innerHTML = '<iconify-icon icon="lucide:check" width="14" height="14" class="text-emerald-500"></iconify-icon>';
+      setTimeout(() => { btn.innerHTML = html; }, 1200);
+    } catch {}
+  });
+
+  input.addEventListener('input', run);
+  run();
+</script>

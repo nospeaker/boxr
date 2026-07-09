@@ -1,0 +1,80 @@
+---
+import { NAV, SITE } from '~/consts';
+const currentPath = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/80">
+  <div class="container-wide flex h-16 items-center justify-between">
+    <a href="/" class="flex items-center gap-2 font-bold tracking-tight text-slate-900 dark:text-slate-50">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">
+        <iconify-icon icon="lucide:wrench" width="18" height="18"></iconify-icon>
+      </span>
+      <span class="text-lg">{SITE.name}</span>
+    </a>
+
+    <nav class="hidden items-center gap-1 md:flex">
+      {NAV.map((item) => {
+        const active = item.href === '/' ? currentPath === '/' : currentPath.startsWith(item.href);
+        return (
+          <a
+            href={item.href}
+            class:list={[
+              'rounded-md px-3 py-2 text-sm font-medium transition',
+              active
+                ? 'bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+            ]}
+          >
+            {item.label}
+          </a>
+        );
+      })}
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <button
+        id="theme-toggle"
+        class="rounded-md p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        aria-label="Toggle dark mode"
+      >
+        <iconify-icon icon="lucide:sun" class="hidden dark:block" width="18" height="18"></iconify-icon>
+        <iconify-icon icon="lucide:moon" class="block dark:hidden" width="18" height="18"></iconify-icon>
+      </button>
+      <a href="https://github.com/utilhub/utilhub" target="_blank" rel="noopener" class="hidden rounded-md p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 sm:block" aria-label="GitHub repository">
+        <iconify-icon icon="lucide:github" width="18" height="18"></iconify-icon>
+      </a>
+      <button id="mobile-menu-toggle" class="rounded-md p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 md:hidden" aria-label="Toggle menu">
+        <iconify-icon icon="lucide:menu" width="20" height="20"></iconify-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 md:hidden">
+    <nav class="container-wide flex flex-col py-2">
+      {NAV.map((item) => (
+        <a
+          href={item.href}
+          class="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Dark mode
+  const toggle = () => {
+    const root = document.documentElement;
+    root.classList.toggle('dark');
+    localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+  };
+  document.getElementById('theme-toggle')?.addEventListener('click', toggle);
+
+  // Mobile menu
+  document.getElementById('mobile-menu-toggle')?.addEventListener('click', () => {
+    document.getElementById('mobile-menu')?.classList.toggle('hidden');
+  });
+</script>

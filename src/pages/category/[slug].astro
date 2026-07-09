@@ -1,0 +1,61 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import ToolCard from '~/components/ToolCard.astro';
+import { tools, categoryMeta } from '~/config/tools';
+import type { ToolCategory } from '~/consts';
+
+export async function getStaticPaths() {
+  return Object.entries(categoryMeta).map(([slug, meta]) => ({
+    params: { slug },
+    props: { slug, meta },
+  }));
+}
+
+const { slug, meta } = Astro.props as { slug: ToolCategory; meta: typeof categoryMeta[ToolCategory] };
+const categoryTools = tools.filter((t) => t.category === slug);
+const otherCategories = Object.entries(categoryMeta).filter(([s]) => s !== slug);
+---
+
+<BaseLayout title={`${meta.label} — UtilHub`} description={meta.description}>
+  <section class="container-wide py-12">
+    <nav class="mb-4 text-sm text-slate-500 dark:text-slate-400">
+      <a href="/" class="hover:text-brand-600 dark:hover:text-brand-300">Home</a>
+      <span class="mx-2">/</span>
+      <span class="text-slate-700 dark:text-slate-300">{meta.label}</span>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 text-brand-600 dark:bg-brand-950 dark:text-brand-300">
+        <iconify-icon icon={`lucide:${meta.icon}`} width="24" height="24"></iconify-icon>
+      </span>
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-50">{meta.label}</h1>
+        <p class="mt-1 text-slate-600 dark:text-slate-300">{meta.description}</p>
+      </div>
+    </div>
+
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {categoryTools.map((tool) => <ToolCard tool={tool} />)}
+    </div>
+
+    {categoryTools.length === 0 && (
+      <div class="mt-12 rounded-2xl bg-slate-50 p-12 text-center dark:bg-slate-900/50">
+        <iconify-icon icon="lucide:wrench" class="text-slate-400" width="40" height="40"></iconify-icon>
+        <h3 class="mt-3 font-semibold text-slate-700 dark:text-slate-200">Tools are coming soon</h3>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">We're building out this category. Check back shortly.</p>
+      </div>
+    )}
+
+    <div class="mt-12 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 dark:bg-slate-900/50 dark:ring-slate-800">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Other categories</h3>
+      <div class="mt-3 flex flex-wrap gap-2">
+        {otherCategories.map(([s, m]) => (
+          <a href={`/category/${s}`} class="rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-brand-50 hover:text-brand-700 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-700">
+            <iconify-icon icon={`lucide:${m.icon}`} width="14" height="14" class="mr-1.5"></iconify-icon>
+            {m.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

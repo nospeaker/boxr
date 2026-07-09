@@ -1,0 +1,49 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+
+const EMAIL = 'hello@utilhub.pages.dev';
+---
+
+<BaseLayout
+  title="Contact"
+  description="Get in touch with the UtilHub team. Bug reports, suggestions, partnership ideas."
+>
+  <section class="container-narrow py-16">
+    <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Contact</h1>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">
+      Bug reports, feature suggestions, partnership ideas — we read every message.
+    </p>
+
+    <div class="mt-10 grid gap-8 md:grid-cols-2">
+      <div class="card">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">By email</h2>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          For general inquiries, support requests, and feedback:
+        </p>
+        <a href={`mailto:${EMAIL}`} class="mt-3 inline-flex items-center gap-2 rounded-lg bg-brand-50 px-3 py-2 font-mono text-sm text-brand-700 ring-1 ring-brand-200 hover:bg-brand-100 dark:bg-brand-950 dark:text-brand-300 dark:ring-brand-900 dark:hover:bg-brand-900/50">
+          <iconify-icon icon="lucide:mail" width="14" height="14"></iconify-icon>
+          {EMAIL}
+        </a>
+      </div>
+
+      <div class="card">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">GitHub</h2>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          Open an issue for bug reports, feature requests, or to browse existing discussions.
+        </p>
+        <a href="https://github.com/utilhub/utilhub/issues" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-700">
+          <iconify-icon icon="lucide:github" width="14" height="14"></iconify-icon>
+          github.com/utilhub/utilhub
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-10 rounded-2xl bg-brand-50 p-6 ring-1 ring-brand-100 dark:bg-brand-950/30 dark:ring-brand-900/50">
+      <h2 class="text-lg font-semibold text-brand-900 dark:text-brand-200">Want a tool added?</h2>
+      <p class="mt-1 text-sm text-brand-800 dark:text-brand-300">
+        We add new tools based on (1) search volume, (2) feasibility as a static in-browser tool,
+        and (3) alignment with our principles (no accounts, no uploads). Suggest one and we'll consider it.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

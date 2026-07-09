@@ -1,0 +1,73 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="About"
+  description="UtilHub is a free, privacy-first collection of online developer and text utilities. Learn what we do, why we built it, and how it works."
+>
+  <section class="container-narrow py-16">
+    <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+      About UtilHub
+    </h1>
+    <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+      UtilHub is a small collection of fast, private, free online tools for developers and content creators.
+    </p>
+
+    <div class="prose prose-slate max-w-none mt-10 dark:prose-invert">
+      <h2>What we believe</h2>
+      <p>
+        Most "online tools" quietly log your data. They run on sketchy ad networks. They ask for accounts and
+        try to upsell you on a Pro plan. We think that's silly for a JSON formatter.
+      </p>
+      <p>
+        UtilHub is built on three principles:
+      </p>
+      <ul>
+        <li><strong>Privacy first.</strong> Every tool runs entirely in your browser. Your data never touches our servers, because we don't have any. There is nothing for us to log.</li>
+        <li><strong>Free forever.</strong> No signup, no paywall, no "X uses left" counter. If we ever monetize, it will be through unobtrusive ads or affiliate links — never by holding your data hostage.</li>
+        <li><strong>Fast and beautiful.</strong> Static-generated pages served from the edge. Sub-second loads anywhere in the world.</li>
+      </ul>
+
+      <h2>How it's built</h2>
+      <p>
+        UtilHub is a fully static site built with <a href="https://astro.build">Astro</a> and
+        <a href="https://tailwindcss.com">Tailwind CSS</a>, hosted on
+        <a href="https://pages.cloudflare.com">Cloudflare Pages</a>. All tools are pure TypeScript and run
+        locally using the browser's built-in JavaScript runtime.
+      </p>
+      <p>
+        We deliberately avoid bundling heavy frameworks like React into the runtime — every byte we ship
+        has to be paid for in load time.
+      </p>
+
+      <h2>Who we are</h2>
+      <p>
+        UtilHub is a small, independent project built by a group of developers who wanted a no-nonsense
+        toolbox we could trust with our own data.
+      </p>
+
+      <h2>Open source</h2>
+      <p>
+        The site source is open and we welcome contributions. Found a bug? Have a tool idea?
+        Open an issue on GitHub (link in footer) or reach out via the <a href="/contact">contact page</a>.
+      </p>
+
+      <h2>Roadmap</h2>
+      <p>Upcoming tools in our queue:</p>
+      <ul>
+        <li>JSON Schema Validator</li>
+        <li>Markdown Table Generator</li>
+        <li>Color Picker / Converter</li>
+        <li>URL-encoded parser for query strings</li>
+        <li>Image-to-Base64 converter</li>
+      </ul>
+
+      <h2>Get in touch</h2>
+      <p>
+        Bug reports, suggestions, and partnership ideas — head to our <a href="/contact">contact page</a>.
+        We read everything.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

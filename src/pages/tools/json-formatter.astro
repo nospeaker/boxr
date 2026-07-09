@@ -1,0 +1,151 @@
+---
+import ToolLayout from '~/layouts/ToolLayout.astro';
+import CopyButton from '~/components/CopyButton.astro';
+
+const SAMPLE = `{
+  "name": "UtilHub",
+  "tools": ["formatter", "regex", "case"],
+  "stats": { "version": 1, "free": true }
+}`;
+---
+
+<ToolLayout toolSlug="json-formatter">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+      <span>Indent:</span>
+      <select id="indent-select" class="rounded-md border-slate-200 bg-white px-2 py-1 text-sm shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-700">
+        <option value="2">2 spaces</option>
+        <option value="4">4 spaces</option>
+        <option value="tab">Tab</option>
+      </select>
+    </label>
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+      <input id="sort-keys" type="checkbox" class="h-4 w-4 rounded text-brand-600 focus:ring-brand-500" />
+      Sort keys alphabetically
+    </label>
+    <div class="ml-auto flex items-center gap-2">
+      <button id="minify-btn" class="btn-ghost text-sm">
+        <iconify-icon icon="lucide:minimize-2" width="14" height="14"></iconify-icon>
+        Minify
+      </button>
+      <button id="sample-btn" class="btn-ghost text-sm">Sample</button>
+      <button id="clear-btn" class="btn-ghost text-sm">Clear</button>
+    </div>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div>
+      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Input</label>
+      <textarea
+        id="json-input"
+        class="input-base scrollbar-thin mt-1 h-[420px] resize-y"
+        placeholder='Paste your JSON here, for example: { "hello": "world" }'
+        spellcheck="false"
+      >{SAMPLE}</textarea>
+    </div>
+    <div>
+      <div class="flex items-center justify-between">
+        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Output</label>
+        <CopyButton data-copy-target="json-output" />
+      </div>
+      <textarea
+        id="json-output"
+        class="input-base scrollbar-thin mt-1 h-[420px] resize-y"
+        readonly
+        spellcheck="false"
+      ></textarea>
+    </div>
+  </div>
+
+  <div id="status-bar" class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+    Loading...
+  </div>
+
+  <div id="error-banner" class="mt-3 hidden rounded-md bg-rose-50 p-3 text-sm text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:ring-rose-900">
+    <strong>Invalid JSON:</strong> <span id="error-message"></span>
+  </div>
+
+  <Fragment slot="about">
+    <p>
+      <strong>{`{JSON Formatter}`}</strong> formats and validates JSON data with syntax highlighting.
+      Paste your data on the left and instantly get a clean, readable output on the right.
+    </p>
+    <ul>
+      <li>✅ Validate JSON syntax in real time</li>
+      <li>✅ Choose between 2 / 4 / tab indentation</li>
+      <li>✅ Optionally sort keys alphabetically</li>
+      <li>✅ One-click minify, copy, sample and clear</li>
+      <li>✅ <strong>100% private</strong> &mdash; everything runs in your browser. We never see your data.</li>
+    </ul>
+    <p>
+      Perfect for debugging API responses, cleaning up minified payloads, or preparing data for documentation.
+    </p>
+  </Fragment>
+</ToolLayout>
+
+<script>
+  import { formatJSON, minifyJSON } from '~/tools/json';
+
+  const input = document.getElementById('json-input') as HTMLTextAreaElement;
+  const output = document.getElementById('json-output') as HTMLTextAreaElement;
+  const errorBanner = document.getElementById('error-banner') as HTMLElement;
+  const errorMessage = document.getElementById('error-message') as HTMLElement;
+  const status = document.getElementById('status-bar') as HTMLElement;
+  const indentSelect = document.getElementById('indent-select') as HTMLSelectElement;
+  const sortKeys = document.getElementById('sort-keys') as HTMLInputElement;
+  const minifyBtn = document.getElementById('minify-btn') as HTMLButtonElement;
+  const sampleBtn = document.getElementById('sample-btn') as HTMLButtonElement;
+  const clearBtn = document.getElementById('clear-btn') as HTMLButtonElement;
+
+  const SAMPLE = `{
+  "name": "UtilHub",
+  "tools": ["formatter", "regex", "case"],
+  "stats": { "version": 1, "free": true }
+}`;
+
+  function run() {
+    const result = formatJSON(input.value, {
+      indent: indentSelect.value === 'tab' ? 'tab' : (parseInt(indentSelect.value, 10) as 2 | 4),
+      sortKeys: sortKeys.checked,
+    });
+    if (!result.isValid) {
+      output.value = '';
+      errorBanner.classList.remove('hidden');
+      errorMessage.textContent = result.error ?? '';
+      status.textContent = '❌ Invalid JSON';
+    } else {
+      output.value = result.text;
+      errorBanner.classList.add('hidden');
+      const bytes = result.sizeBytes;
+      const lines = result.lineCount;
+      status.textContent = `✓ Valid · ${lines} lines · ${formatBytes(bytes)}`;
+    }
+  }
+
+  function minify() {
+    const result = minifyJSON(input.value);
+    if (!result.isValid) {
+      errorBanner.classList.remove('hidden');
+      errorMessage.textContent = result.error ?? '';
+      status.textContent = '❌ Invalid JSON';
+      return;
+    }
+    output.value = result.text;
+    status.textContent = `✓ Minified · ${formatBytes(result.sizeBytes)}`;
+  }
+
+  function formatBytes(b: number) {
+    if (b < 1024) return `${b} B`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    return `${(b / 1024 / 1024).toFixed(2)} MB`;
+  }
+
+  input.addEventListener('input', run);
+  indentSelect.addEventListener('change', run);
+  sortKeys.addEventListener('change', run);
+  minifyBtn.addEventListener('click', minify);
+  sampleBtn.addEventListener('click', () => { input.value = SAMPLE; run(); });
+  clearBtn.addEventListener('click', () => { input.value = ''; run(); });
+
+  run();
+</script>

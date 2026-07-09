@@ -1,0 +1,50 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
+);
+---
+
+<BaseLayout
+  title="Blog — UtilHub"
+  description="Articles, guides and tips on developer tooling, productivity, JSON, regex and more."
+>
+  <section class="container-wide py-12">
+    <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-50">Blog</h1>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">
+      Insights, guides and tips on developer tooling, regex patterns, JSON best practices, and more.
+    </p>
+
+    <div class="mt-10 grid gap-6 md:grid-cols-2">
+      {posts.map((post) => (
+        <a href={`/blog/${post.slug}`} class="group card flex flex-col hover:ring-brand-500 hover:shadow-md transition">
+          <span class="text-xs font-medium text-brand-600 dark:text-brand-400">
+            {post.data.category}
+          </span>
+          <h2 class="mt-2 text-lg font-semibold text-slate-900 group-hover:text-brand-700 dark:text-slate-100 dark:group-hover:text-brand-300">
+            {post.data.title}
+          </h2>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            {post.data.description}
+          </p>
+          <div class="mt-auto pt-4 text-xs text-slate-500 dark:text-slate-500">
+            <time datetime={post.data.publishedAt.toISOString()}>
+              {post.data.publishedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </time>
+            · {post.data.readingTime} min read
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {posts.length === 0 && (
+      <div class="mt-12 rounded-2xl bg-slate-50 p-12 text-center dark:bg-slate-900/50">
+        <iconify-icon icon="lucide:book-open" class="text-slate-400" width="40" height="40"></iconify-icon>
+        <h3 class="mt-3 font-semibold text-slate-700 dark:text-slate-200">No posts yet</h3>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">We're writing articles. Subscribe via RSS to be notified.</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>

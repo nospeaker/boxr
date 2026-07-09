@@ -1,0 +1,68 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacy Policy"
+  description="UtilHub privacy policy. We don't collect, store, or transmit your input data. Read the full policy here."
+>
+  <section class="container-narrow py-16">
+    <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Privacy Policy</h1>
+    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+      Last updated: July 8, 2026
+    </p>
+
+    <div class="prose prose-slate max-w-none mt-8 dark:prose-invert">
+      <p>
+        <strong>Short version:</strong> UtilHub does not collect, store, transmit, or sell any of your
+        input data. All tool processing happens locally in your browser.
+      </p>
+
+      <h2>1. Information We Collect</h2>
+      <p>
+        We collect almost nothing. Specifically:
+      </p>
+      <ul>
+        <li><strong>No input data.</strong> When you paste text into a UtilHub tool, it never leaves your device. We do not log, store, or transmit it.</li>
+        <li><strong>No personal information.</strong> We do not require accounts, email addresses, or names.</li>
+        <li><strong>Standard server logs.</strong> Cloudflare Pages, our hosting provider, may log standard request metadata (IP address, user agent, requested URL). These logs are used solely for abuse prevention and operational debugging, are retained for a short period, and are not shared with us beyond aggregated counts.</li>
+      </ul>
+
+      <h2>2. Cookies and Local Storage</h2>
+      <p>
+        UtilHub sets <strong>one</strong> local-storage value: your theme preference (light or dark mode).
+        We use no advertising cookies, no tracking cookies, and no third-party analytics scripts that store
+        cross-site identifiers.
+      </p>
+
+      <h2>3. Analytics</h2>
+      <p>
+        We may use privacy-friendly analytics (such as Plausible or self-hosted Umami) to understand aggregate
+        traffic patterns. These tools do not use cookies and do not collect personal identifiers.
+      </p>
+
+      <h2>4. Advertising</h2>
+      <p>
+        UtilHub is free, and may display advertising through Google AdSense or similar programs once traffic
+        thresholds are met. These ad networks use cookies to serve ads. You can opt out via
+        <a href="https://www.google.com/settings/ads">Google Ad Settings</a> or
+        <a href="https://optout.aboutads.info">DAA opt-out</a>.
+      </p>
+
+      <h2>5. Children</h2>
+      <p>
+        UtilHub is not directed at children under 13. We do not knowingly collect information from children.
+      </p>
+
+      <h2>6. Changes</h2>
+      <p>
+        We may update this policy occasionally. Material changes will be reflected in the "Last updated" date above.
+      </p>
+
+      <h2>7. Contact</h2>
+      <p>
+        Questions? Concerns? Visit our <a href="/contact">contact page</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

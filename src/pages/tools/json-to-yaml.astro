@@ -1,0 +1,154 @@
+---
+import ToolLayout from '~/layouts/ToolLayout.astro';
+import CopyButton from '~/components/CopyButton.astro';
+
+const SAMPLE_JSON = `{
+  "name": "UtilHub",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build"
+  }
+}`;
+
+const SAMPLE_YAML = `name: UtilHub
+version: 0.1.0
+private: true
+scripts:
+  dev: astro dev
+  build: astro build
+`;
+---
+
+<ToolLayout toolSlug="json-to-yaml">
+  <div class="mb-3 flex flex-wrap items-center gap-2">
+    <div class="inline-flex rounded-lg bg-slate-100 p-1 text-sm font-medium dark:bg-slate-800">
+      <button data-direction="json2yaml" class="dir-btn rounded-md px-3 py-1 transition data-[active=true]:bg-white data-[active=true]:shadow dark:data-[active=true]:bg-slate-900">JSON → YAML</button>
+      <button data-direction="yaml2json" class="dir-btn rounded-md px-3 py-1 transition data-[active=true]:bg-white data-[active=true]:shadow dark:data-[active=true]:bg-slate-900">YAML → JSON</button>
+    </div>
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+      Indent:
+      <select id="indent" class="rounded-md border-slate-200 bg-white px-2 py-1 text-sm shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-700">
+        <option value="2">2 spaces</option>
+        <option value="4">4 spaces</option>
+      </select>
+    </label>
+    <div class="ml-auto flex items-center gap-2">
+      <CopyButton data-copy-target="yaml-output" />
+      <button id="clear-btn" class="btn-ghost text-sm">Clear</button>
+    </div>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div>
+      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" id="input-label">JSON</label>
+      <textarea id="yaml-input" class="input-base scrollbar-thin mt-1 h-[460px] resize-y font-mono text-sm" spellcheck="false">{SAMPLE_JSON}</textarea>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" id="output-label">YAML</label>
+      <textarea id="yaml-output" class="input-base scrollbar-thin mt-1 h-[460px] resize-y font-mono text-sm" readonly spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <div id="status-bar" class="mt-3 text-xs text-slate-500 dark:text-slate-400"></div>
+  <div id="error-banner" class="mt-3 hidden rounded-md bg-rose-50 p-3 text-sm text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:ring-rose-900">
+    <strong>Error:</strong> <span id="error-message"></span>
+  </div>
+
+  <Fragment slot="about">
+    <p>Convert between JSON and YAML formats. Useful for config files, Kubernetes manifests, Docker Compose, GitHub Actions, etc.</p>
+    <ul>
+      <li>✅ Bidirectional conversion</li>
+      <li>✅ Configurable indentation (2 / 4 spaces)</li>
+      <li>✅ Quote-aware YAML escaping</li>
+      <li>✅ Reverse direction parses your YAML back to clean JSON</li>
+      <li>✅ All in your browser &mdash; never uploaded</li>
+    </ul>
+  </Fragment>
+</ToolLayout>
+
+<script>
+  import { jsonToYAML, yamlToJson } from '~/tools/yaml';
+
+  const input = document.getElementById('yaml-input') as HTMLTextAreaElement;
+  const output = document.getElementById('yaml-output') as HTMLTextAreaElement;
+  const status = document.getElementById('status-bar') as HTMLElement;
+  const errorBanner = document.getElementById('error-banner') as HTMLElement;
+  const errorMessage = document.getElementById('error-message') as HTMLElement;
+  const inputLabel = document.getElementById('input-label') as HTMLElement;
+  const outputLabel = document.getElementById('output-label') as HTMLElement;
+  const indentSelect = document.getElementById('indent') as HTMLSelectElement;
+  const dirButtons = document.querySelectorAll<HTMLButtonElement>('.dir-btn');
+
+  let direction: 'json2yaml' | 'yaml2json' = 'json2yaml';
+  const JSON_SAMPLE = `{
+  "name": "UtilHub",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build"
+  }
+}`;
+  const YAML_SAMPLE = `name: UtilHub
+version: 0.1.0
+private: true
+scripts:
+  dev: astro dev
+  build: astro build
+`;
+
+  function setDirection(d: typeof direction) {
+    direction = d;
+    dirButtons.forEach((b) => {
+      delete b.dataset.active;
+      if (b.dataset.direction === d) b.dataset.active = 'true';
+    });
+    if (d === 'json2yaml') {
+      inputLabel.textContent = 'JSON';
+      outputLabel.textContent = 'YAML';
+      input.value = JSON_SAMPLE;
+    } else {
+      inputLabel.textContent = 'YAML';
+      outputLabel.textContent = 'JSON';
+      input.value = YAML_SAMPLE;
+    }
+    run();
+  }
+
+  function run() {
+    if (direction === 'json2yaml') {
+      const result = jsonToYAML(input.value, parseInt(indentSelect.value, 10));
+      if (result.error) {
+        output.value = '';
+        errorBanner.classList.remove('hidden');
+        errorMessage.textContent = result.error;
+        status.textContent = '❌ Invalid JSON';
+        return;
+      }
+      output.value = result.text;
+      errorBanner.classList.add('hidden');
+      status.textContent = `✓ YAML · ${result.text.split('\n').length} lines`;
+    } else {
+      const result = yamlToJson(input.value);
+      if (result.error) {
+        output.value = '';
+        errorBanner.classList.remove('hidden');
+        errorMessage.textContent = result.error;
+        status.textContent = '❌ Invalid YAML';
+        return;
+      }
+      output.value = result.text;
+      errorBanner.classList.add('hidden');
+      status.textContent = `✓ JSON · ${result.text.split('\n').length} lines`;
+    }
+  }
+
+  dirButtons.forEach((b) => b.addEventListener('click', () => setDirection(b.dataset.direction as typeof direction)));
+  [input, indentSelect].forEach((el) => el.addEventListener('input', run));
+  document.getElementById('clear-btn')?.addEventListener('click', () => { input.value = ''; run(); });
+
+  if (dirButtons[0]) dirButtons[0].dataset.active = 'true';
+  run();
+</script>

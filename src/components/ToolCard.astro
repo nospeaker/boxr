@@ -1,0 +1,29 @@
+---
+import type { ToolConfig } from '~/config/tools';
+
+interface Props {
+  tool: ToolConfig;
+  size?: 'default' | 'compact';
+}
+
+const { tool, size = 'default' } = Astro.props;
+---
+
+<a
+  href={`/tools/${tool.slug}`}
+  class:list={[
+    'group flex items-start gap-4 rounded-2xl ring-1 ring-slate-200 transition hover:ring-brand-500 hover:shadow-md',
+    'bg-white p-5 dark:bg-slate-900 dark:ring-slate-800 dark:hover:ring-brand-500',
+    size === 'compact' ? 'p-4' : 'p-5',
+  ]}
+>
+  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 group-hover:bg-brand-100 dark:bg-brand-950 dark:text-brand-300 dark:group-hover:bg-brand-900/50">
+    <iconify-icon icon={`lucide:${tool.icon}`} width="20" height="20"></iconify-icon>
+  </span>
+  <div class="min-w-0">
+    <h3 class:list={[size === 'compact' ? 'text-base' : 'text-lg', 'font-semibold text-slate-900 group-hover:text-brand-700 dark:text-slate-100 dark:group-hover:text-brand-300']}>
+      {tool.title}
+    </h3>
+    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{tool.description}</p>
+  </div>
+</a>

@@ -1,0 +1,95 @@
+---
+import ToolLayout from '~/layouts/ToolLayout.astro';
+---
+
+<ToolLayout toolSlug="uuid-generator">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+      Version:
+      <select id="version" class="rounded-md border-slate-200 bg-white px-2 py-1 text-sm shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-700">
+        <option value="v4">v4 (random)</option>
+        <option value="v7" selected>v7 (sortable, recommended)</option>
+        <option value="v1">v1 (timestamp + MAC)</option>
+        <option value="v5">v5 (name + namespace)</option>
+      </select>
+    </label>
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+      Count:
+      <input id="count" type="number" min="1" max="100" value="10" class="w-20 rounded-md border-slate-200 bg-white px-2 py-1 text-sm shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-700" />
+    </label>
+    <button id="generate-btn" class="btn-primary text-sm">
+      <iconify-icon icon="lucide:refresh-cw" width="14" height="14"></iconify-icon>
+      Generate
+    </button>
+    <div class="ml-auto flex items-center gap-2">
+      <button id="copy-all-btn" class="btn-secondary text-sm">
+        <iconify-icon icon="lucide:copy" width="14" height="14"></iconify-icon>
+        Copy all
+      </button>
+    </div>
+  </div>
+
+  <div id="uuids" class="space-y-1 rounded-lg bg-slate-50 p-3 font-mono text-sm ring-1 ring-slate-200 dark:bg-slate-900/50 dark:ring-slate-800"></div>
+
+  <Fragment slot="about">
+    <p>Generate UUIDs (Universally Unique Identifiers) for use as database keys, request IDs, file names, and anywhere you need collision-resistant unique values.</p>
+    <ul>
+      <li><strong>v4</strong> — pure random. Use by default.</li>
+      <li><strong>v7</strong> — time-ordered (sortable). Best for primary keys / log-friendly ordering.</li>
+      <li><strong>v1</strong> — timestamp + MAC. Legacy; rarely needed.</li>
+      <li><strong>v5</strong> — deterministic from a name + namespace (DNS, URL, etc.).</li>
+    </ul>
+    <p>Generated using the browser's <code>crypto.getRandomValues</code> API — cryptographically strong.</p>
+  </Fragment>
+</ToolLayout>
+
+<script>
+  import { generateUuid } from '~/tools/uuid';
+
+  const versionSelect = document.getElementById('version') as HTMLSelectElement;
+  const countInput = document.getElementById('count') as HTMLInputElement;
+  const generateBtn = document.getElementById('generate-btn') as HTMLButtonElement;
+  const copyAllBtn = document.getElementById('copy-all-btn') as HTMLButtonElement;
+  const list = document.getElementById('uuids') as HTMLElement;
+
+  function run() {
+    const version = versionSelect.value as 'v1' | 'v4' | 'v5' | 'v7';
+    const count = Math.max(1, Math.min(100, parseInt(countInput.value, 10) || 1));
+    const items = generateUuid(version, count);
+    list.innerHTML = items
+      .map((u) => `<div class="flex items-center justify-between rounded px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 group">
+        <span>${u}</span>
+        <button class="copy-one text-xs text-slate-400 group-hover:text-brand-600" data-uuid="${u}">
+          <iconify-icon icon="lucide:copy" width="12" height="12"></iconify-icon>
+        </button>
+      </div>`)
+      .join('');
+  }
+
+  generateBtn.addEventListener('click', run);
+  [versionSelect, countInput].forEach((el) => el.addEventListener('input', run));
+
+  copyAllBtn.addEventListener('click', async () => {
+    const items = Array.from(list.querySelectorAll<HTMLElement>('[data-uuid]')).map((el) => el.dataset.uuid);
+    if (items.length === 0) return;
+    await navigator.clipboard.writeText(items.join('\n'));
+    const html = copyAllBtn.innerHTML;
+    copyAllBtn.innerHTML = '<iconify-icon icon="lucide:check" width="14" height="14" class="text-emerald-500"></iconify-icon> Copied!';
+    setTimeout(() => { copyAllBtn.innerHTML = html; }, 1200);
+  });
+
+  list.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    const btn = target.closest<HTMLElement>('[data-uuid]');
+    if (!btn) return;
+    const u = btn.dataset.uuid;
+    if (!u) return;
+    await navigator.clipboard.writeText(u);
+    btn.innerHTML = '<iconify-icon icon="lucide:check" width="12" height="12" class="text-emerald-500"></iconify-icon>';
+    setTimeout(() => {
+      btn.innerHTML = '<iconify-icon icon="lucide:copy" width="12" height="12"></iconify-icon>';
+    }, 1200);
+  });
+
+  run();
+</script>

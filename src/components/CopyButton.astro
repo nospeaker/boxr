@@ -1,0 +1,46 @@
+---
+// Copy to clipboard button — universal tool component
+---
+
+<button
+  data-copy-button
+  class="btn-secondary group"
+>
+  <iconify-icon icon="lucide:copy" width="14" height="14" class="transition group-data-[copied=true]:hidden"></iconify-icon>
+  <iconify-icon icon="lucide:check" width="14" height="14" class="hidden text-emerald-500 group-data-[copied=true]:block"></iconify-icon>
+  <span data-copy-label>Copy</span>
+</button>
+
+<script>
+  document.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    const btn = target.closest('[data-copy-button]') as HTMLElement | null;
+    if (!btn) return;
+
+    const targetId = btn.getAttribute('data-copy-target');
+    if (!targetId) return;
+
+    const source = document.getElementById(targetId) as (HTMLTextAreaElement | HTMLInputElement | HTMLElement) | null;
+    if (!source) return;
+
+    const value =
+      source instanceof HTMLInputElement || source instanceof HTMLTextAreaElement
+        ? source.value
+        : source.textContent ?? '';
+    try {
+      await navigator.clipboard.writeText(value);
+      btn.setAttribute('data-copied', 'true');
+      const label = btn.querySelector('[data-copy-label]') as HTMLElement | null;
+      if (label) {
+        const original = label.textContent ?? 'Copy';
+        label.textContent = 'Copied!';
+        setTimeout(() => {
+          label.textContent = original;
+          btn.removeAttribute('data-copied');
+        }, 1400);
+      }
+    } catch {
+      // ignore
+    }
+  });
+</script>

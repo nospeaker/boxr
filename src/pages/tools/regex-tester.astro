@@ -1,0 +1,134 @@
+---
+import ToolLayout from '~/layouts/ToolLayout.astro';
+
+const SAMPLE_REGEX = '\\b(\\w+)\\b';
+const SAMPLE_TEXT = 'The quick brown fox jumps over the lazy dog. The dog barked.';
+---
+
+<ToolLayout toolSlug="regex-tester">
+  <div class="space-y-4">
+    <div class="grid gap-3 lg:grid-cols-[1fr_auto]">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Regular expression</label>
+        <div class="mt-1 flex items-stretch overflow-hidden rounded-lg shadow-sm ring-1 ring-slate-200 focus-within:ring-2 focus-within:ring-brand-500/30 dark:ring-slate-700">
+          <span class="flex items-center bg-slate-100 px-3 font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">/</span>
+          <input id="regex-input" type="text" value={SAMPLE_REGEX} spellcheck="false" class="flex-1 bg-white px-2 py-2 font-mono text-sm focus:outline-none dark:bg-slate-900 dark:text-slate-100" />
+          <span class="flex items-center bg-slate-100 px-3 font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">/</span>
+          <input id="flags-input" type="text" value="gi" maxlength="6" class="w-16 bg-white px-2 py-2 text-center font-mono text-sm focus:outline-none dark:bg-slate-900 dark:text-slate-100" placeholder="flags" />
+        </div>
+      </div>
+
+      <div class="flex items-end gap-2">
+        <button id="sample-btn" class="btn-ghost text-sm">Sample</button>
+        <button id="clear-btn" class="btn-ghost text-sm">Clear</button>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Test string</label>
+      <textarea id="regex-text" spellcheck="false" class="input-base scrollbar-thin mt-1 h-40 resize-y">{SAMPLE_TEXT}</textarea>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between">
+        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Highlighted matches</label>
+        <span id="status" class="text-xs text-slate-500 dark:text-slate-400"></span>
+      </div>
+      <div id="highlight" class="scrollbar-thin mt-1 max-h-72 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-4 font-mono text-sm ring-1 ring-slate-200 dark:bg-slate-900/50 dark:ring-slate-800"></div>
+    </div>
+
+    <div>
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Matches</h3>
+      <div id="match-list" class="mt-2 max-h-64 overflow-auto rounded-lg ring-1 ring-slate-200 dark:ring-slate-800"></div>
+    </div>
+
+    <div id="error-banner" class="hidden rounded-md bg-rose-50 p-3 text-sm text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:ring-rose-900">
+      <strong>Regex error:</strong> <span id="error-message"></span>
+    </div>
+  </div>
+
+  <Fragment slot="about">
+    <p>Test JavaScript regular expressions in real time, with highlights and capture group inspection.</p>
+    <ul>
+      <li>✅ Live match highlighting</li>
+      <li>✅ Supports flags <code>g</code> <code>i</code> <code>m</code> <code>s</code> <code>u</code> <code>y</code></li>
+      <li>✅ Capture groups (numbered and named) shown for each match</li>
+      <li>✅ Shows match index and execution time</li>
+      <li>✅ All processing is client-side</li>
+    </ul>
+  </Fragment>
+</ToolLayout>
+
+<script>
+  import { testRegex, highlightMatches } from '~/tools/regex';
+
+  const regexInput = document.getElementById('regex-input') as HTMLInputElement;
+  const flagsInput = document.getElementById('flags-input') as HTMLInputElement;
+  const textInput = document.getElementById('regex-text') as HTMLTextAreaElement;
+  const highlight = document.getElementById('highlight') as HTMLElement;
+  const matchList = document.getElementById('match-list') as HTMLElement;
+  const status = document.getElementById('status') as HTMLElement;
+  const errorBanner = document.getElementById('error-banner') as HTMLElement;
+  const errorMessage = document.getElementById('error-message') as HTMLElement;
+
+  const SAMPLE_REGEX = '\\b(\\w+)\\b';
+  const SAMPLE_TEXT = 'The quick brown fox jumps over the lazy dog. The dog barked.';
+
+  function escapeHtml(text: string): string {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function run() {
+    const result = testRegex(regexInput.value, flagsInput.value, textInput.value);
+    if (!result.ok) {
+      errorBanner.classList.remove('hidden');
+      errorMessage.textContent = result.error ?? '';
+      status.textContent = '❌ Invalid';
+      highlight.innerHTML = escapeHtml(textInput.value);
+      matchList.innerHTML = '';
+      return;
+    }
+    errorBanner.classList.add('hidden');
+    highlight.innerHTML = highlightMatches(textInput.value, result.matches);
+    status.textContent = `${result.totalMatches} matches · ${result.executionTimeMs}ms`;
+
+    if (result.matches.length === 0) {
+      matchList.innerHTML = '<div class="p-4 text-sm text-slate-500 dark:text-slate-400">No matches found.</div>';
+      return;
+    }
+
+    const rows = result.matches.map((m, i) => {
+      const groupRows = m.groups.map((g, gi) => `<tr><td class="px-3 py-1 text-slate-500">$${gi + 1}</td><td class="px-3 py-1 font-mono text-slate-800 dark:text-slate-200">${escapeHtml(g)}</td></tr>`).join('');
+      const namedRows = Object.entries(m.namedGroups)
+        .map(([k, v]) => `<tr><td class="px-3 py-1 text-slate-500">${escapeHtml(k)}</td><td class="px-3 py-1 font-mono text-slate-800 dark:text-slate-200">${escapeHtml(v)}</td></tr>`)
+        .join('');
+      return `
+        <details class="border-b border-slate-200 px-3 py-3 last:border-b-0 dark:border-slate-800">
+          <summary class="cursor-pointer text-sm">
+            <span class="font-semibold">#${i + 1}</span>
+            <span class="ml-2 font-mono text-amber-600 dark:text-amber-300">${escapeHtml(m.match)}</span>
+            <span class="ml-2 text-xs text-slate-500">@ ${m.index}</span>
+          </summary>
+          ${groupRows || namedRows ? `<table class="mt-2 ml-4 text-xs"><tbody>${groupRows}${namedRows}</tbody></table>` : ''}
+        </details>
+      `;
+    }).join('');
+    matchList.innerHTML = rows;
+  }
+
+  [regexInput, flagsInput, textInput].forEach((el) => el.addEventListener('input', run));
+
+  document.getElementById('sample-btn')?.addEventListener('click', () => {
+    regexInput.value = SAMPLE_REGEX;
+    flagsInput.value = 'gi';
+    textInput.value = SAMPLE_TEXT;
+    run();
+  });
+  document.getElementById('clear-btn')?.addEventListener('click', () => {
+    regexInput.value = '';
+    textInput.value = '';
+    run();
+  });
+
+  run();
+</script>

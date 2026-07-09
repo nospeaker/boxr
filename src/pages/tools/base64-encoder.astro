@@ -1,0 +1,119 @@
+---
+import ToolLayout from '~/layouts/ToolLayout.astro';
+import CopyButton from '~/components/CopyButton.astro';
+
+const SAMPLE_TEXT = 'UtilHub — Free online tools for developers.';
+const SAMPLE_BASE64 = 'VXRpbEh1YiDigJQgRnJlZSBvbmxpbmUgdG9vbHMgZm9yIGRldmVsb3BlcnMu';
+---
+
+<ToolLayout toolSlug="base64-encoder">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <div class="inline-flex rounded-lg bg-slate-100 p-1 text-sm font-medium dark:bg-slate-800">
+      <button data-mode="encode" class="mode-btn rounded-md px-3 py-1 transition data-[active=true]:bg-white data-[active=true]:shadow dark:data-[active=true]:bg-slate-900">Encode</button>
+      <button data-mode="decode" class="mode-btn rounded-md px-3 py-1 transition data-[active=true]:bg-white data-[active=true]:shadow dark:data-[active=true]:bg-slate-900">Decode</button>
+    </div>
+    <div class="ml-auto flex items-center gap-2">
+      <CopyButton data-copy-target="b64-output" />
+      <button id="sample-btn" class="btn-ghost text-sm">Sample</button>
+      <button id="clear-btn" class="btn-ghost text-sm">Clear</button>
+    </div>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div>
+      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" id="b64-input-label">Text</label>
+      <textarea id="b64-input" class="input-base scrollbar-thin mt-1 h-[420px] resize-y font-mono text-sm" spellcheck="false">{SAMPLE_TEXT}</textarea>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" id="b64-output-label">Base64</label>
+      <textarea id="b64-output" class="input-base scrollbar-thin mt-1 h-[420px] resize-y font-mono text-sm" readonly spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <div id="status-bar" class="mt-3 text-xs text-slate-500 dark:text-slate-400"></div>
+  <div id="error-banner" class="mt-3 hidden rounded-md bg-rose-50 p-3 text-sm text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:ring-rose-900">
+    <strong>Error:</strong> <span id="error-message"></span>
+  </div>
+
+  <Fragment slot="about">
+    <p>Encode plain text to Base64 or decode Base64 strings back to text. UTF-8 safe — handles emojis and non-ASCII characters correctly.</p>
+    <ul>
+      <li>✅ Bidirectional (encode / decode)</li>
+      <li>✅ UTF-8 aware — works with Chinese, emojis, accented characters</li>
+      <li>✅ Auto-detects invalid Base64 input</li>
+      <li>✅ 100% in browser</li>
+    </ul>
+  </Fragment>
+</ToolLayout>
+
+<script>
+  import { encodeBase64, decodeBase64 } from '~/tools/base64';
+
+  const input = document.getElementById('b64-input') as HTMLTextAreaElement;
+  const output = document.getElementById('b64-output') as HTMLTextAreaElement;
+  const status = document.getElementById('status-bar') as HTMLElement;
+  const errorBanner = document.getElementById('error-banner') as HTMLElement;
+  const errorMessage = document.getElementById('error-message') as HTMLElement;
+  const inputLabel = document.getElementById('b64-input-label') as HTMLElement;
+  const outputLabel = document.getElementById('b64-output-label') as HTMLElement;
+  const modeButtons = document.querySelectorAll<HTMLButtonElement>('.mode-btn');
+
+  let mode: 'encode' | 'decode' = 'encode';
+  const SAMPLE_TEXT = 'UtilHub — Free online tools for developers.';
+  const SAMPLE_BASE64 = 'VXRpbEh1YiDigJQgRnJlZSBvbmxpbmUgdG9vbHMgZm9yIGRldmVsb3BlcnMu';
+
+  function setMode(m: typeof mode) {
+    mode = m;
+    modeButtons.forEach((b) => {
+      delete b.dataset.active;
+      if (b.dataset.mode === m) b.dataset.active = 'true';
+    });
+    if (m === 'encode') {
+      inputLabel.textContent = 'Text';
+      outputLabel.textContent = 'Base64';
+      input.value = SAMPLE_TEXT;
+    } else {
+      inputLabel.textContent = 'Base64';
+      outputLabel.textContent = 'Text';
+      input.value = SAMPLE_BASE64;
+    }
+    run();
+  }
+
+  function run() {
+    if (mode === 'encode') {
+      const r = encodeBase64(input.value);
+      if (r.error) {
+        output.value = '';
+        errorBanner.classList.remove('hidden');
+        errorMessage.textContent = r.error;
+        return;
+      }
+      output.value = r.text;
+      errorBanner.classList.add('hidden');
+      status.textContent = `✓ Encoded · ${r.bytes} bytes input`;
+    } else {
+      const r = decodeBase64(input.value);
+      if (r.error) {
+        output.value = '';
+        errorBanner.classList.remove('hidden');
+        errorMessage.textContent = r.error;
+        status.textContent = '❌ Invalid';
+        return;
+      }
+      output.value = r.text;
+      errorBanner.classList.add('hidden');
+      status.textContent = `✓ Decoded · ${r.bytes} bytes`;
+    }
+  }
+
+  modeButtons.forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode as typeof mode)));
+  input.addEventListener('input', run);
+  document.getElementById('sample-btn')?.addEventListener('click', () => {
+    input.value = mode === 'encode' ? SAMPLE_TEXT : SAMPLE_BASE64;
+    run();
+  });
+  document.getElementById('clear-btn')?.addEventListener('click', () => { input.value = ''; run(); });
+  if (modeButtons[0]) modeButtons[0].dataset.active = 'true';
+  run();
+</script>
